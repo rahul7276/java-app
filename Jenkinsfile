@@ -2,16 +2,21 @@
 
 pipeline{
   agent any
+  parameters{
+    choice(name: 'action', choices: 'create\ndelete', description: 'Choose create/Destroy')
+ }
   stages{
     stage('Git Checkout'){
-        steps{
-            gitCheckout(
-                branch: "master",
-                url: "https://github.com/rahul7276/java-app.git"
+      when { expression {  params.action == 'create' } }
+      steps{
+        gitCheckout(
+          branch: "master",
+          url: "https://github.com/rahul7276/java-app.git"
         )
       }
     }
     stage('Unit Test maven'){
+      when { expression {  params.action == 'create' } }
       steps{
         script{
           mvnTest()
@@ -19,11 +24,21 @@ pipeline{
       }
     }
     stage('Integration Test Maven'){
+      when { expression {  params.action == 'create' } }
       steps{
         script{
           mvnIntegrationTest()
         }
       }        
     }
-  }
-}  
+    stage('Static code analysis: Sonarqube'){
+      when { expression {  params.action == 'create' } }
+        steps{
+          script{
+            def SonarQubecredentialsId = 'sonarqube-api'
+            statiCodeAnalysis(SonarQubecredentialsId)
+          }
+        }
+      }
+    }
+  }  
