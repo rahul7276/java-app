@@ -80,9 +80,7 @@ pipeline{
       when { expression {  params.action == 'create' } }
         steps{
           script{
-            aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 121797143523.dkr.ecr.ap-south-1.amazonaws.com
-            docker push 121797143523.dkr.ecr.ap-south-1.amazonaws.com/rahul0403:latest
-            //dockerImagePush("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
+            dockerImagePush("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
           }
         }
       }   
