@@ -4,9 +4,9 @@ pipeline{
   agent any
   parameters{
     choice(name: 'action', choices: 'create\ndelete', description: 'Choose create/Destroy')
-    string(name: 'aws_account_id', description: " AWS Account ID", defaultValue: '121797143523')
-    string(name: 'Region', description: "Region of ECR", defaultValue: 'ap-south-1')
-    string(name: 'ECR_REPO_NAME', description: "name of the ECR", defaultValue: 'rahul0403')
+    //string(name: 'aws_account_id', description: " AWS Account ID", defaultValue: '121797143523')
+    //string(name: 'Region', description: "Region of ECR", defaultValue: 'ap-south-1')
+    // string(name: 'ECR_REPO_NAME', description: "name of the ECR", defaultValue: 'rahul0403')
  }
   stages{
     stage('Git Checkout'){
@@ -64,33 +64,13 @@ pipeline{
       when { expression {  params.action == 'create' } }
         steps{
           script{
-            dockerBuild("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
+            //dockerBuild("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
+            aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 121797143523.dkr.ecr.ap-south-1.amazonaws.com
+            docker build -t rahul0403 .
+            docker tag rahul0403:latest 121797143523.dkr.ecr.ap-south-1.amazonaws.com/rahul0403:latest
+            docker push 121797143523.dkr.ecr.ap-south-1.amazonaws.com/rahul0403:latest
           }
         }
-      }
-    stage('Docker Image Scan: trivy '){
-      when { expression {  params.action == 'create' } }
-        steps{
-          script{
-            dockerImageScan("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
-          }
-        }
-      }
-    stage('Docker Image Push : ECR '){
-      when { expression {  params.action == 'create' } }
-        steps{
-          script{
-            dockerImagePush("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
-          }
-        }
-      }   
-    stage('Docker Image Cleanup : ECR '){
-      when { expression {  params.action == 'create' } }
-        steps{
-          script{
-            dockerImageCleanup("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
-          }
-        }
-      }
+      }    
     }
   }
