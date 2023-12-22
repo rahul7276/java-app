@@ -18,7 +18,41 @@ pipeline{
         )
       }
     }
-    stage('Maven Build'){
+   stage('Unit Test maven'){
+      when { expression {  params.action == 'create' } }
+      steps{
+        script{
+          mvnTest()
+        }
+      }
+    }
+    stage('Integration Test Maven'){
+      when { expression {  params.action == 'create' } }
+      steps{
+        script{
+          mvnIntegrationTest()
+        }
+      }        
+    }
+    stage('Static code analysis: Sonarqube'){
+      when { expression {  params.action == 'create' } }
+        steps{
+          script{
+            def SonarQubecredentialsId = 'sonarqube-api'
+            statiCodeAnalysis(SonarQubecredentialsId)
+          }
+        }
+      }
+    stage('Quality Gate Status Check : Sonarqube'){
+      when { expression {  params.action == 'create' } }
+        steps{
+          script{
+            def SonarQubecredentialsId = 'sonarqube-api'
+            QualityGateStatus(SonarQubecredentialsId)
+          }
+        }
+      }
+     stage('Maven Build'){
       when { expression {  params.action == 'create' } }
         steps{
           script{
@@ -33,8 +67,15 @@ pipeline{
             dockerBuild("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
           }
         }
-      }  
-    
+      } 
+    stage('Docker Image Scan: trivy '){
+      when { expression {  params.action == 'create' } }
+        steps{
+          script{
+            dockerImageScan("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
+          }
+        }
+      }
     stage('Docker Image Push : ECR '){
       when { expression {  params.action == 'create' } }
         steps{
@@ -43,5 +84,13 @@ pipeline{
           }
         }
       } 
+    stage('Docker Image Cleanup : ECR '){
+      when { expression {  params.action == 'create' } }
+        steps{
+          script{
+            dockerImageCleanup("${params.aws_account_id}","${params.Region}","${params.ECR_REPO_NAME}")
+          }
+        }
+      }
     }
   }
