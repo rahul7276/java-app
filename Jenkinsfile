@@ -4,9 +4,9 @@ pipeline{
   agent any
   parameters{
     choice(name: 'action', choices: 'create\ndelete', description: 'Choose create/Destroy')
-   // string(name: 'aws_account_id', description: " AWS Account ID", defaultValue: '121797143523')
-   // string(name: 'Region', description: "Region of ECR", defaultValue: 'ap-south-1')
-   // string(name: 'ECR_REPO_NAME', description: "name of the ECR", defaultValue: 'rahul0403')
+    string(name: 'aws_account_id', description: " AWS Account ID", defaultValue: '121797143523')
+    string(name: 'Region', description: "Region of ECR", defaultValue: 'ap-south-1')
+    string(name: 'ECR_REPO_NAME', description: "name of the ECR", defaultValue: 'rahul0403')
  }
   stages{
     stage('Git Checkout'){
